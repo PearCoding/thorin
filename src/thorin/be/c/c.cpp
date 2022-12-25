@@ -415,6 +415,25 @@ void CCodeGen::emit_module() {
         stream_.fmt(    "typedef  float f32;\n");
         if (use_fp_64_)
             stream_.fmt("typedef double f64;\n");
+
+        // Add vectorized typedefs
+        for(int vec_len: std::array{2,3,4,8,16}) {
+            stream_ << "\n"
+                    << "typedef   char" << vec_len << " i8" << vec_len << ";\n"
+                    << "typedef   uchar" << vec_len << " u8" << vec_len << ";\n"
+                    << "typedef   short" << vec_len << " i16" << vec_len << ";\n"
+                    << "typedef   ushort" << vec_len << " u16" << vec_len << ";\n"
+                    << "typedef   int" << vec_len << " i32" << vec_len << ";\n"
+                    << "typedef   uint" << vec_len << " u32" << vec_len << ";\n"
+                    << "typedef   long" << vec_len << " i64" << vec_len << ";\n"
+                    << "typedef   ulong" << vec_len << " u64" << vec_len << ";\n";
+
+            if (use_fp_16_)
+                stream_ << "typedef   half" << vec_len << " f16" << vec_len << ";\n";
+            stream_ << "typedef   float" << vec_len << " f32" << vec_len << ";\n";
+            if (use_fp_64_)
+                stream_ << "typedef   double" << vec_len << " f64" << vec_len << ";\n";
+        }
     }
 
     stream_.endl();
@@ -1145,8 +1164,8 @@ std::string CCodeGen::emit_def(BB* bb, const Def* def) {
             case PrimType_pu16: case PrimType_qu16: return std::to_string(primlit->pu16_value());
             case PrimType_ps32: case PrimType_qs32: return std::to_string(primlit->ps32_value());
             case PrimType_pu32: case PrimType_qu32: return std::to_string(primlit->pu32_value());
-            case PrimType_ps64: case PrimType_qs64: return std::to_string(primlit->ps64_value()) + "LL";
-            case PrimType_pu64: case PrimType_qu64: return std::to_string(primlit->pu64_value()) + "ULL";
+            case PrimType_ps64: case PrimType_qs64: return std::to_string(primlit->ps64_value()) + (lang_ != Lang::OpenCL ? "LL" : "");
+            case PrimType_pu64: case PrimType_qu64: return std::to_string(primlit->pu64_value()) + (lang_ != Lang::OpenCL ? "ULL" : "");
             case PrimType_pf16:
             case PrimType_qf16:
                 return emit_float<half>(primlit->pf16_value(),
@@ -1430,7 +1449,14 @@ std::string CCodeGen::emit_fun_head(Continuation* cont, bool is_proto) {
             {
                 qualifier = lang_ == Lang::CUDA ? " __restrict" : " restrict";
             }
-            s.fmt("{}{}", convert(param->type()), qualifier);
+
+            std::string global_prefix;
+            if(lang_ == Lang::OpenCL && cont->is_exported() && param->type()->isa<PtrType>())
+            {
+                // OpenCL requires input pointer to be classified with the global address space
+                global_prefix = "__global ";
+            }
+            s.fmt("{}{}{}", global_prefix, convert(param->type()), qualifier);
             if (!is_proto) s.fmt(" {}", param->unique_name());
         }
         needs_comma = true;
