@@ -1417,6 +1417,8 @@ std::string CCodeGen::emit_fun_head(Continuation* cont, bool is_proto) {
         }
         if (needs_comma) s.fmt(", ");
 
+        // TODO: OpenCL kernels can not have bool as parameter, cast it to i32 instead?
+
         // TODO: This should go in favor of a prepare pass that rewrites the kernel parameters
         if (lang_ == Lang::OpenCL && cont->is_exported() && is_passed_via_buffer(param)) {
             // OpenCL structs are passed via buffer; the parameter is a pointer to this buffer
