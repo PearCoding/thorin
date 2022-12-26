@@ -419,20 +419,20 @@ void CCodeGen::emit_module() {
         // Add vectorized typedefs
         for(int vec_len: std::array{2,3,4,8,16}) {
             stream_ << "\n"
-                    << "typedef   char" << vec_len << " i8" << vec_len << ";\n"
-                    << "typedef   uchar" << vec_len << " u8" << vec_len << ";\n"
-                    << "typedef   short" << vec_len << " i16" << vec_len << ";\n"
-                    << "typedef   ushort" << vec_len << " u16" << vec_len << ";\n"
-                    << "typedef   int" << vec_len << " i32" << vec_len << ";\n"
+                    << "typedef   char" << vec_len << "  i8" << vec_len << ";\n"
+                    << "typedef  uchar" << vec_len << "  u8" << vec_len << ";\n"
+                    << "typedef  short" << vec_len << " i16" << vec_len << ";\n"
+                    << "typedef ushort" << vec_len << " u16" << vec_len << ";\n"
+                    << "typedef    int" << vec_len << " i32" << vec_len << ";\n"
                     << "typedef   uint" << vec_len << " u32" << vec_len << ";\n"
                     << "typedef   long" << vec_len << " i64" << vec_len << ";\n"
-                    << "typedef   ulong" << vec_len << " u64" << vec_len << ";\n";
+                    << "typedef  ulong" << vec_len << " u64" << vec_len << ";\n";
 
             if (use_fp_16_)
                 stream_ << "typedef   half" << vec_len << " f16" << vec_len << ";\n";
-            stream_ << "typedef   float" << vec_len << " f32" << vec_len << ";\n";
+            stream_ <<     "typedef  float" << vec_len << " f32" << vec_len << ";\n";
             if (use_fp_64_)
-                stream_ << "typedef   double" << vec_len << " f64" << vec_len << ";\n";
+                stream_ << "typedef double" << vec_len << " f64" << vec_len << ";\n";
         }
     }
 
