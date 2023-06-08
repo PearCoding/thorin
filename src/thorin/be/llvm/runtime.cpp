@@ -67,16 +67,23 @@ Continuation* Runtime::emit_host_code(CodeGen& code_gen, llvm::IRBuilder<>& buil
     // target(mem, device, (dim.x, dim.y, dim.z), (block.x, block.y, block.z), body, return, free_vars)
     auto target = body->callee()->as_nom<Continuation>();
     assert_unused(target->is_intrinsic());
+
     assert(body->num_args() >= LaunchArgs::Num && "required arguments are missing");
 
     // arguments
     auto target_device_id = code_gen.emit(body->arg(LaunchArgs::Device));
-    auto target_platform = builder.getInt32(platform);
+    auto target_platform = builder.getInt32(platform); // TODO: better use anydsl_get_device()
     auto target_device = builder.CreateOr(target_platform, builder.CreateShl(target_device_id, builder.getInt32(4)));
 
     auto it_space = body->arg(LaunchArgs::Space);
     auto it_config = body->arg(LaunchArgs::Config);
     auto kernel = body->arg(LaunchArgs::Body)->as<Global>()->init()->as<Continuation>();
+
+    std::string unique_name = extract_string(body->arg(LaunchArgs::Name));
+    if (!unique_name.empty()) {
+        escape_string(unique_name);
+        kernel->set_name(unique_name);
+    }
 
     auto& world = continuation->world();
     auto kernel_name = builder.CreateGlobalStringPtr(kernel->name() == "hls_top" ? kernel->name() : kernel->unique_name());
@@ -105,7 +112,7 @@ Continuation* Runtime::emit_host_code(CodeGen& code_gen, llvm::IRBuilder<>& buil
             builder.CreateStore(target_val, alloca);
 
             // check if argument type contains pointers
-            if (!contains_ptrtype(target_arg->type()))
+            if (!contains_ptrtype(target_arg->type()) && platform == OPENCL_PLATFORM)
                 world.wdef(target_arg, "argument '{}' of aggregate type '{}' contains pointer (not supported in OpenCL 1.2)", target_arg, target_arg->type());
 
             void_ptr = builder.CreatePointerCast(alloca, builder.getInt8PtrTy());
