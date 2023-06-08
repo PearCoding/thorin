@@ -716,7 +716,9 @@ inline std::string extract_string(const Def* def) {
                 const auto primlit = op->as<PrimLit>();
                 if(primlit == nullptr)
                     return {};
-                str += (char)primlit->pu8_value();
+                const char c = (char)primlit->pu8_value();
+                if (c != '\0')
+                    str += c;
             }
         }
         return str;
