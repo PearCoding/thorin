@@ -25,7 +25,7 @@ public:
         HSA_PLATFORM
     };
 
-    /// Emits a call to anydsl_launch_kernel.
+    /// Emits a call to anydsl_std_launch_kernel.
     llvm::Value* launch_kernel(
         CodeGen&, llvm::IRBuilder<>&, llvm::Value* device,
         llvm::Value* file, llvm::Value* kernel,
@@ -33,7 +33,7 @@ public:
         llvm::Value* args, llvm::Value* sizes, llvm::Value* aligns, llvm::Value* allocs, llvm::Value* types,
         llvm::Value* num_args);
 
-    /// Emits a call to anydsl_parallel_for.
+    /// Emits a call to anydsl_std_parallel_for.
     llvm::Value* parallel_for(
         CodeGen&, llvm::IRBuilder<>&,
         llvm::Value* num_threads, llvm::Value* lower, llvm::Value* upper,
@@ -45,9 +45,9 @@ public:
         llvm::Value* num_threads, llvm::Value* num_blocks, llvm::Value* num_warps,
         llvm::Value* closure_ptr, llvm::Value* fun_ptr);
 
-    /// Emits a call to anydsl_spawn_thread.
+    /// Emits a call to anydsl_std_spawn_thread.
     llvm::Value* spawn_thread(CodeGen&, llvm::IRBuilder<>&, llvm::Value* closure_ptr, llvm::Value* fun_ptr);
-    /// Emits a call to anydsl_sync_thread.
+    /// Emits a call to anydsl_std_sync_thread.
     llvm::Value* sync_thread(CodeGen&, llvm::IRBuilder<>&, llvm::Value* id);
 
     Continuation* emit_host_code(

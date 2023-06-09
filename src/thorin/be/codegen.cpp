@@ -59,7 +59,7 @@ static const App* get_alloc_call(const Def* def) {
         if (!call || use.index() == 0) continue;
 
         auto callee = call->callee();
-        if (callee->name() != "anydsl_alloc") continue;
+        if (callee->name() != "anydsl_std_allocate") continue;
 
         return call;
     }
@@ -70,7 +70,7 @@ static uint64_t get_alloc_size(const Def* def) {
     auto call = get_alloc_call(def);
     if (!call) return 0;
 
-    // signature: anydsl_alloc(mem, i32, i64, fn(mem, &[i8]))
+    // signature: anydsl_std_allocate(mem, i32, i64, fn(mem, &[i8]))
     auto size = call->arg(2)->isa<PrimLit>();
     return size ? static_cast<uint64_t>(size->value().get_qu64()) : 0_u64;
 }

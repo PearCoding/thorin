@@ -72,7 +72,7 @@ Continuation* Runtime::emit_host_code(CodeGen& code_gen, llvm::IRBuilder<>& buil
 
     // arguments
     auto target_device_id = code_gen.emit(body->arg(LaunchArgs::Device));
-    auto target_platform = builder.getInt32(platform); // TODO: better use anydsl_get_device()
+    auto target_platform = builder.getInt32(platform);
     auto target_device = builder.CreateOr(target_platform, builder.CreateShl(target_device_id, builder.getInt32(4)));
 
     auto it_space = body->arg(LaunchArgs::Space);
@@ -202,7 +202,7 @@ llvm::Value* Runtime::launch_kernel(
     llvm::Value* num_args)
 {
     llvm::Value* launch_args[] = { device, file, kernel, grid, block, args, sizes, aligns, allocs, types, num_args };
-    return builder.CreateCall(get(code_gen, "anydsl_launch_kernel"), launch_args);
+    return builder.CreateCall(get(code_gen, "anydsl_std_launch_kernel"), launch_args);
 }
 
 llvm::Value* Runtime::parallel_for(
@@ -214,7 +214,7 @@ llvm::Value* Runtime::parallel_for(
         builder.CreatePointerCast(closure_ptr, builder.getInt8PtrTy()),
         builder.CreatePointerCast(fun_ptr, builder.getInt8PtrTy())
     };
-    return builder.CreateCall(get(code_gen, "anydsl_parallel_for"), parallel_args);
+    return builder.CreateCall(get(code_gen, "anydsl_std_parallel_for"), parallel_args);
 }
 
 llvm::Value* Runtime::spawn_fibers(
@@ -234,11 +234,11 @@ llvm::Value* Runtime::spawn_thread(CodeGen& code_gen, llvm::IRBuilder<>& builder
         builder.CreatePointerCast(closure_ptr, builder.getInt8PtrTy()),
         builder.CreatePointerCast(fun_ptr, builder.getInt8PtrTy())
     };
-    return builder.CreateCall(get(code_gen, "anydsl_spawn_thread"), spawn_args);
+    return builder.CreateCall(get(code_gen, "anydsl_std_spawn_thread"), spawn_args);
 }
 
 llvm::Value* Runtime::sync_thread(CodeGen& code_gen, llvm::IRBuilder<>& builder, llvm::Value* id) {
-    return builder.CreateCall(get(code_gen, "anydsl_sync_thread"), id);
+    return builder.CreateCall(get(code_gen, "anydsl_std_sync_thread"), id);
 }
 
 }

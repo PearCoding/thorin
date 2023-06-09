@@ -12,7 +12,7 @@ public:
     CPUCodeGen(World& world, int opt, bool debug, std::string& target_triple, std::string& target_cpu, std::string& target_attr);
 
 protected:
-    std::string get_alloc_name() const override { return "anydsl_alloc"; }
+    std::string get_alloc_name() const override { return "anydsl_std_allocate"; }
 };
 
 }
